@@ -1,4 +1,4 @@
-package com.yaroslav.tinyurl.json;
+package com.yaroslav.siteindex.json;
 
 import java.util.Objects;
 
