@@ -16,26 +16,20 @@ import java.io.IOException;
 
 
 @RestController
-@RequestMapping(value = "")
-public class AppController {
+@RequestMapping(value = "/app")
+public class AppController
+{
     int i = 0;
-
-    @Autowired
-    ElasticsearchUtil elasticsearchUtil;
-
-    @Autowired
-    Crawler crawler;
-
     @Autowired
     KafkaHelper kafka;
 
     @Autowired
-    ObjectMapper om;
+    Crawler crawler;
 
-
-    @RequestMapping(value = "/app", method = RequestMethod.GET)
-    public String sayHello() {
-        return "Hello";
+    @RequestMapping(value = "/hello", method = RequestMethod.GET)
+    public String sayHello()
+    {
+        return "Hello!";
     }
 
     @RequestMapping(value = "/invokeKafkaListener", method = RequestMethod.GET)
@@ -47,15 +41,18 @@ public class AppController {
         return crawler.crawl(url);
     }
 
-    @RequestMapping(value = "/status", method = RequestMethod.GET)
-    public CrawlStatus getStatus(String crawlId) {
+    @RequestMapping(value = "/getCrawlStatus", method = RequestMethod.GET)
+    public CrawlStatus getCrawlStatus(String crawlId) {
         return crawler.crawlStatus(crawlId);
     }
 
-    @RequestMapping(value = "/searchelastic", method = RequestMethod.GET)
-    public JsonNode searchelastic(@RequestParam String keyword) throws IOException {
-        return om.readTree(elasticsearchUtil.getData(keyword));
+    @RequestMapping(value = "/searchWithElastic", method = RequestMethod.GET)
+    public String searchWithElastic(String crawlId, String text) throws IOException {
+        return crawler.searchWithElastic(crawlId, text);
     }
 
+    @RequestMapping(value = "/searchEverythingWithElastic", method = RequestMethod.GET)
+    public String searchEverythingWithElastic(String text) throws IOException {
+        return crawler.searchEverythingWithElastic(text);
+    }
 }
-
