@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class Crawler {
-    private static final int MAX_MINUTES = 2;
+    private static final int MAX_MINUTES = 60;
     private static final int MAX_DISTANCE_LIMIT = 4;
     private static final int MAX_TIME_LIMIT = 100000;
     private static final int EMPTY_QUEUE_TIME_LIMIT = 10000;
