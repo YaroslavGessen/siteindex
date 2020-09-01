@@ -12,6 +12,7 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -90,7 +91,7 @@ public class Crawler {
         Document webPageContent = getWebPageContent(webPageUrl);
         List<String> innerUrls = extractWebPageUrls(baseUrl, webPageContent);
         addUrlsToQueue(crawlId, innerUrls, crawlDistance);
-        addElasticSearch(baseUrl, webPageUrl, webPageContent, crawlDistance);
+        addElasticSearch(crawlId, baseUrl, webPageUrl, webPageContent, crawlDistance);
     }
 
     private void checkCrawlsTimeLimits() {
@@ -135,10 +136,11 @@ public class Crawler {
         kafka.send(queueRecord);
     }
 
-    private void addElasticSearch(String baseUrl, String webPageUrl, Document webPageContent, int level) {
+    private void addElasticSearch(String crawlId, String baseUrl, String webPageUrl,
+                                  Document webPageContent, int level) {
         System.out.println(">> adding elastic search for webPage: " + baseUrl);
         String text = String.join(" ", webPageContent.select("a[href]").eachText());
-        UrlSearchDoc searchDoc = UrlSearchDoc.of(text, webPageUrl, baseUrl, level);
+        UrlSearchDoc searchDoc = UrlSearchDoc.of(crawlId, text, webPageUrl, baseUrl, level);
         elasticsearch.addData(searchDoc);
     }
 
@@ -166,5 +168,16 @@ public class Crawler {
         } catch (Exception e) {
             return "";
         }
+    }
+
+    public String searchWithElastic(String crawlId, String text) throws IOException {
+        System.out.println(">> receiving data from elastic search: search text->" + text);
+        String res = elasticsearch.search(crawlId, text);
+
+        return res.substring(res.indexOf("\"hits\":"));
+    }
+
+    public String searchEverythingWithElastic(String text) throws IOException {
+        return elasticsearch.searchEverything(text);
     }
 }
