@@ -38,15 +38,11 @@ public class AppController {
         return "Hello";
     }
 
-    @RequestMapping(value = "/kafka", method = RequestMethod.GET)
-    public String testKafka()
-    {
-        kafka.send("Hello from kafka" + ++i);
-
-        return kafka.recieve(String.class).toString();
+    @RequestMapping(value = "/invokeKafkaListener", method = RequestMethod.GET)
+    public void invokeKafkaListener() {
+        crawler.startListeningToKafka();
     }
-
-    @RequestMapping(value = "/app/crawl1", method = RequestMethod.GET)
+    @RequestMapping(value = "/crawl", method = RequestMethod.GET)
     public String crawl(@RequestParam String url) throws IOException {
         return crawler.crawl(url);
     }
@@ -56,7 +52,7 @@ public class AppController {
         return crawler.crawlStatus(crawlId);
     }
 
-    @RequestMapping(value = "/app/searchelastic", method = RequestMethod.GET)
+    @RequestMapping(value = "/searchelastic", method = RequestMethod.GET)
     public JsonNode searchelastic(@RequestParam String keyword) throws IOException {
         return om.readTree(elasticsearchUtil.getData(keyword));
     }
