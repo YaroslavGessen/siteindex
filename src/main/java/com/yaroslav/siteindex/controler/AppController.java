@@ -26,17 +26,11 @@ public class AppController
     @Autowired
     Crawler crawler;
 
-    @RequestMapping(value = "/hello", method = RequestMethod.GET)
-    public String sayHello()
-    {
-        return "Hello!";
-    }
-
     @RequestMapping(value = "/invokeKafkaListener", method = RequestMethod.GET)
     public void invokeKafkaListener() {
         crawler.startListeningToKafka();
     }
-    @RequestMapping(value = "/crawl", method = RequestMethod.GET)
+    @RequestMapping(value = "/crawl", method = RequestMethod.POST)
     public String crawl(@RequestParam String url) throws IOException {
         return crawler.crawl(url);
     }
