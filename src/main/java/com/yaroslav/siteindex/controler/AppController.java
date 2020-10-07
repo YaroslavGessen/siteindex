@@ -30,12 +30,10 @@ public class AppController {
     @Autowired
     ObjectMapper om;
 
-
     @RequestMapping(value = "/invokeKafkaListener", method = RequestMethod.GET)
     public void invokeKafkaListener() {
         crawler.startListeningToKafka();
     }
-
     @RequestMapping(value = "/crawl", method = RequestMethod.POST)
     public String crawl(@RequestParam String url) throws IOException {
         return crawler.crawl(url);
@@ -46,7 +44,7 @@ public class AppController {
         return crawler.crawlStatus(crawlId);
     }
 
-    @RequestMapping(value = "/elasticSearch", method = RequestMethod.GET)
+    @RequestMapping(value = "/searchWithElastic", method = RequestMethod.GET)
     public String searchWithElastic(String crawlId, String text) throws IOException {
         return crawler.searchWithElastic(crawlId, text);
     }
@@ -56,4 +54,3 @@ public class AppController {
     }
 
 }
-

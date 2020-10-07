@@ -58,12 +58,12 @@ public class Crawler {
     }
 
     private void run() {
-        System.out.println("Kafka thread running");
+        System.out.println(">> Kafka thread running <<");
         long runningTime = 0;
         long startTime = System.currentTimeMillis();
         while (TimeUnit.MILLISECONDS.toMinutes(runningTime) < MAX_MINUTES) {
             List<CrawlerQueueRecord> queueRecords = kafka.recieve(CrawlerQueueRecord.class);
-
+            System.out.println(">> receiving queueRecords from kafka: received->" + queueRecords.size() + " records");
             for (CrawlerQueueRecord queueRecord : queueRecords) {
                 crawlSingleUrl(queueRecord);
             }
@@ -71,6 +71,7 @@ public class Crawler {
             checkCrawlsTimeLimits();
             runningTime = System.currentTimeMillis() - startTime;
         }
+        System.out.println(">> Kafka stop running <<");
     }
 
     public String searchWithElastic(String crawlId, String text) throws IOException {
@@ -98,11 +99,16 @@ public class Crawler {
     }
 
     private void process(String crawlId, String webPageUrl, int crawlDistance) {
-        String baseUrl = crawlsCollection.get(crawlId).getBaseUrl();
-        Document webPageContent = getWebPageContent(webPageUrl);
-        List<String> innerUrls = extractWebPageUrls(baseUrl, webPageContent);
-        addUrlsToQueue(crawlId, innerUrls, crawlDistance);
-        addElasticSearch(crawlId, baseUrl, webPageUrl, webPageContent, crawlDistance);
+        try {
+            Document webPageContent = Jsoup.connect(webPageUrl).get();
+            String baseUrl = crawlsCollection.get(crawlId).getBaseUrl();
+            System.out.println(">> extracting links from webPage: " + webPageUrl);
+            List<String> innerUrls = extractWebPageUrls(baseUrl, webPageContent);
+            addUrlsToQueue(crawlId, innerUrls, crawlDistance);
+            addElasticSearch(crawlId, baseUrl, webPageUrl, webPageContent, crawlDistance);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void checkCrawlsTimeLimits() {
@@ -155,10 +161,15 @@ public class Crawler {
     }
 
     private List<String> extractWebPageUrls(String baseUrl, Document webPageContent) {
-        System.out.println(">> extracting urls from current webPage");
-        List<String> links = webPageContent.select("a[href]").eachAttr("abs:href");
 
-        return links.stream().filter(url -> url.startsWith(baseUrl)).collect(Collectors.toList());
+        List<String> links = webPageContent.select("a[href]")
+                .eachAttr("abs:href")
+                .stream()
+                .filter(url -> url.startsWith(baseUrl))
+                .collect(Collectors.toList());
+        System.out.println(">> extracted->" + links.size() + " links");
+
+        return links;
     }
 
     private Document getWebPageContent(String webPageUrl) {

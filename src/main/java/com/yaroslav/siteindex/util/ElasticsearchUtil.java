@@ -38,7 +38,6 @@ public class ElasticsearchUtil {
             MediaType mediaType = MediaType.parse("application/json");
             RequestBody body = RequestBody.create(mediaType, content);
             System.out.println(om.writeValueAsString(doc));
-            System.out.println(doc.toString());
             Request request = new Request.Builder()
                     .url(baseUrl +  "/doc")
                     .method("POST", body)
@@ -46,7 +45,7 @@ public class ElasticsearchUtil {
                     .addHeader(HttpHeaders.AUTHORIZATION, "Basic " + auth)
                     .build();
             Response response =  client.newCall(request).execute();
-//            System.out.println("@@@@" + response.body().string());
+            //  System.out.println("@@@@" + response.body().string());
         } catch (Exception e) {
             e.printStackTrace();
         }
