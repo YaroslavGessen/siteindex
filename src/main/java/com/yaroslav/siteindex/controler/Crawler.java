@@ -63,7 +63,6 @@ public class Crawler {
         long startTime = System.currentTimeMillis();
         while (TimeUnit.MILLISECONDS.toMinutes(runningTime) < MAX_MINUTES) {
             List<CrawlerQueueRecord> queueRecords = kafka.recieve(CrawlerQueueRecord.class);
-            System.out.println(">> receiving queueRecords from kafka: received->" + queueRecords.size() + " records");
             for (CrawlerQueueRecord queueRecord : queueRecords) {
                 crawlSingleUrl(queueRecord);
             }
