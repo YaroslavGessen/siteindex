@@ -20,7 +20,9 @@ public class ElasticsearchUtil {
 
     @Value("${elastic.base.url}")
     private String baseUrl;
-
+    
+    private static final String ELASTIC_SEARCH_URL =
+            "https://site:4610c374b4b7ae2bd80f0a8d1384a12f@gimli-eu-west-1.searchly.com/elastic/_search";
     private static final String API_KEY = "site:4610c374b4b7ae2bd80f0a8d1384a12f";
 
     @Autowired
@@ -47,7 +49,6 @@ public class ElasticsearchUtil {
                     .addHeader(HttpHeaders.AUTHORIZATION, "Basic " + auth)
                     .build();
             Response response =  client.newCall(request).execute();
-            System.out.println("@@@@" + response.body().string());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,7 +75,7 @@ public class ElasticsearchUtil {
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, buildBody(crawlId, text));
         Request request = new Request.Builder()
-                .url(baseUrl + "/_search")
+                .url(ELASTIC_SEARCH_URL)
                 .method("POST", body)
                 .addHeader("Content-Type", "application/json")
                 .addHeader(HttpHeaders.AUTHORIZATION, "Basic " + auth)
