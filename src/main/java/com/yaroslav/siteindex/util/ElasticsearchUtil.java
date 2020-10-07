@@ -1,6 +1,6 @@
 package com.yaroslav.siteindex.util;
 
-
+import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yaroslav.siteindex.json.UrlSearchDoc;
 import com.squareup.okhttp.*;
@@ -13,17 +13,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-
 @Component
 public class ElasticsearchUtil {
-
-    @Value("${elastic.base.url}")
-    private String baseUrl;
-    
     private static final String ELASTIC_SEARCH_URL =
             "https://site:4610c374b4b7ae2bd80f0a8d1384a12f@gimli-eu-west-1.searchly.com/elastic/_search";
     private static final String API_KEY = "site:4610c374b4b7ae2bd80f0a8d1384a12f";
+
+    @Value("${elastic.base.url}")
+    private String baseUrl;
 
     @Autowired
     RestTemplate restTemplate;
@@ -49,11 +46,11 @@ public class ElasticsearchUtil {
                     .addHeader(HttpHeaders.AUTHORIZATION, "Basic " + auth)
                     .build();
             Response response =  client.newCall(request).execute();
+//            System.out.println("@@@@" + response.body().string());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
     public String searchEverything(String text) throws IOException {
         String auth =  new String(Base64.encodeBase64(API_KEY.getBytes()));
         OkHttpClient client = new OkHttpClient();
@@ -64,10 +61,8 @@ public class ElasticsearchUtil {
                 .addHeader(HttpHeaders.AUTHORIZATION, "Basic " + auth)
                 .build();
         Response response = client.newCall(request).execute();
-        String res = response.body().string();
-        return res;
+        return response.body().string();
     }
-
 
     public String search(String crawlId, String text) throws IOException {
         String auth =  new String(Base64.encodeBase64(API_KEY.getBytes()));
@@ -85,7 +80,6 @@ public class ElasticsearchUtil {
 
         return res;
     }
-
     private String buildBody(String crawlId, String text){
         return " {\r\n" +
                 "  \"query\": {\r\n" +

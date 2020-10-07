@@ -12,16 +12,16 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.io.IOException;
 
 @Component
 public class Crawler {
-    private static final int MAX_MINUTES = 60;
+    private static final int MAX_MINUTES = 2;
     private static final int MAX_DISTANCE_LIMIT = 4;
     private static final int MAX_TIME_LIMIT = 100000;
     private static final int EMPTY_QUEUE_TIME_LIMIT = 10000;
@@ -71,6 +71,17 @@ public class Crawler {
             checkCrawlsTimeLimits();
             runningTime = System.currentTimeMillis() - startTime;
         }
+    }
+
+    public String searchWithElastic(String crawlId, String text) throws IOException {
+        System.out.println(">> receiving data from elastic search: search text->" + text);
+        String res = elasticsearch.search(crawlId, text);
+
+        return res.substring(res.indexOf("\"hits\":"));
+    }
+
+    public String searchEverythingWithElastic(String text) throws IOException {
+        return elasticsearch.searchEverything(text);
     }
 
     private void crawlSingleUrl(CrawlerQueueRecord queueRecord) {
@@ -136,8 +147,7 @@ public class Crawler {
         kafka.send(queueRecord);
     }
 
-    private void addElasticSearch(String crawlId, String baseUrl, String webPageUrl,
-                                  Document webPageContent, int level) {
+    private void addElasticSearch(String crawlId, String baseUrl, String webPageUrl, Document webPageContent, int level) {
         System.out.println(">> adding elastic search for webPage: " + baseUrl);
         String text = String.join(" ", webPageContent.select("a[href]").eachText());
         UrlSearchDoc searchDoc = UrlSearchDoc.of(crawlId, text, webPageUrl, baseUrl, level);
@@ -168,16 +178,5 @@ public class Crawler {
         } catch (Exception e) {
             return "";
         }
-    }
-
-    public String searchWithElastic(String crawlId, String text) throws IOException {
-        System.out.println(">> receiving data from elastic search: search text->" + text);
-        String res = elasticsearch.search(crawlId, text);
-
-        return res.substring(res.indexOf("\"hits\":"));
-    }
-
-    public String searchEverythingWithElastic(String text) throws IOException {
-        return elasticsearch.searchEverything(text);
     }
 }
